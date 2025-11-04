@@ -593,12 +593,7 @@ const UIController = {
       }
     });
     
-    // Disclaimer
-    document.getElementById('dismissDisclaimer').addEventListener('click', () => {
-      document.getElementById('disclaimer').classList.add('hidden');
-    });
-  }
-};
+    
 
 // Application Initialization
 function initApp() {
