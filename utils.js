@@ -168,7 +168,6 @@ class Node {
 }
 
 // Packet class for network traffic visualization
-// Packet class for network traffic visualization
 class Packet {
   constructor(id, source, target, type, speed = 2) {
     this.id = id;
@@ -181,64 +180,33 @@ class Packet {
     this.y = source.y;
     this.active = true;
     this.trail = [];
-
-    // NEW: whether this packet is on its return trip (server -> attacker)
-    this.returning = false;
   }
 
   update() {
     if (!this.active) return false;
-
-    // advance progress
+    
     this.progress += this.speed * 0.01;
-
-    // If completed a leg (progress >= 1)
+    
     if (this.progress >= 1) {
-      // If this packet started at an attacker and reached the server, make it return once
-      // (we check node types conservatively; only perform return for attacker->server flows)
-      if (!this.returning && this.source && this.target
-          && this.source.type === 'attacker' && this.target.type === 'server') {
-        // begin return trip: swap source and target, reset progress, clear trail
-        this.returning = true;
-
-        const prevSource = this.source;
-        this.source = this.target;   // now server is the source for the return
-        this.target = prevSource;    // attacker becomes the return target
-
-        // reset position/progress so it travels back from server -> attacker
-        this.progress = 0;
-        this.x = this.source.x;
-        this.y = this.source.y;
-        this.trail = [];
-
-        // keep packet active so it can travel back
-        return true;
-      }
-
-      // Otherwise, this packet has completed its final trip — mark inactive
       this.active = false;
       return false;
     }
-
+    
     // Smooth interpolation with slight curve
     const t = this.progress;
     const ease = t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
-
-    // interpolate position from source -> target
+    
     this.x = MathUtils.lerp(this.source.x, this.target.x, ease);
     this.y = MathUtils.lerp(this.source.y, this.target.y, ease);
-
+    
     // Add to trail
     this.trail.push({ x: this.x, y: this.y, alpha: 1 });
     if (this.trail.length > 10) {
       this.trail.shift();
     }
-
+    
     return true;
   }
-
-  
-}
 
   draw(ctx) {
     if (!this.active) return;
